@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\DataFeed;
 use App\Models\Ventas;
+
 use App\Models\producto;
 use App\Models\User;
 use App\Models\cliente;
@@ -14,6 +15,7 @@ use App\Models\Gastos;
 use Illuminate\Support\Facades\DB;
 use Psy\Readline\Hoa\Console;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -63,82 +65,83 @@ class DashboardController extends Controller
 }
 
 
+public function index(Request $request)
+{
+    $dataFeed = new DataFeed();
 
-    public function index(Request $request)
-    {
-        $dataFeed = new DataFeed();
+    // Obtener la última fecha de compra o asignar una fecha por defecto
+    $ultimaFechaCompra = Compras::latest('created_at')->value('created_at') ?? Carbon::now();
+    $ultimaFechaCompra = Carbon::parse($ultimaFechaCompra)->format('Y-m-d');
 
-        // Obtener las fechas de inicio y fin del request
-        $fechaInicio = $request->input('fecha_inicio');
-        $fechaFin = $request->input('fecha_fin');
+    // Obtener la fecha actual
+    $fechaActual = Carbon::now()->format('Y-m-d');
 
-        // Si hay fechas, filtrar las ventas, compras, y gastos en el rango; si no, mostrar todos
-        if ($fechaInicio && $fechaFin) {
-            // Ajustar las fechas para asegurar que cubran todo el rango del día
-            $fechaInicio = $fechaInicio . ' 00:00:00';
-            $fechaFin = $fechaFin . ' 23:59:59';
+    // Obtener las fechas de inicio y fin del request o usar las fechas por defecto
+    $fechaInicio = $request->input('fecha_inicio', $ultimaFechaCompra);
+    $fechaFin = $request->input('fecha_fin', $fechaActual);
+    $fechaInicioCompleta = $fechaInicio . ' 00:00:00';
+    $fechaFinCompleta = $fechaFin . ' 23:59:59';
+    // Filtrar ventas, compras, y gastos según las fechas y calcular los datos necesarios
+    if ($fechaInicio && $fechaFin) {
+        $fechaInicioCompleta = $fechaInicio . ' 00:00:00';
+        $fechaFinCompleta = $fechaFin . ' 23:59:59';
 
-            // Filtrar ventas, compras y gastos por fechas
-            $ventas = Ventas::whereBetween('created_at', [$fechaInicio, $fechaFin])->sum('total');
-            $compras = Compras::whereBetween('created_at', [$fechaInicio, $fechaFin])->sum('total');
-            $gastos = Gastos::whereBetween('created_at', [$fechaInicio, $fechaFin])->sum('total');
+        $ventas = Ventas::whereBetween('created_at', [$fechaInicioCompleta, $fechaFinCompleta])->sum('total');
+        $compras = Compras::whereBetween('created_at', [$fechaInicioCompleta, $fechaFinCompleta])->sum('total');
+        $gastos = Gastos::whereBetween('created_at', [$fechaInicioCompleta, $fechaFinCompleta])->sum('total');
 
-            // Filtrar las ventas realizadas
-            $ventasrealizadas = Ventas::whereBetween('created_at', [$fechaInicio, $fechaFin])->get();
-
-            // Calcular ganancias usando la nueva lógica con fechas, y restar gastos
-            $ganancias = $this->calcularGanancias($fechaInicio, $fechaFin) - $gastos;
-        } else {
-            // Mostrar todos los datos si no se especifica un rango
-            $ventas = Ventas::sum('total');
-            $compras = Compras::sum('total');
-            $gastos = Gastos::sum('total');
-            $ventasrealizadas = Ventas::all();
-
-            // Calcular ganancias sin fechas, y restar gastos
-            $ganancias = $this->calcularGanancias() - $gastos;
-        }
-
-        // Calcular la sumatoria de (precio * cantidad) para todos los productos
-        $productos = Producto::sum(DB::raw('precio * cantidad'));
-
-        // Contar la cantidad de clientes y usuarios
-        $clientes = Cliente::count();
-        $usuario = User::count();
-
-        $ventasPorFecha = Ventas::selectRaw('DATE(created_at) as fecha, SUM(total) as total')
-            ->when($fechaInicio && $fechaFin, function ($query) use ($fechaInicio, $fechaFin) {
-                return $query->whereBetween('created_at', [$fechaInicio, $fechaFin]);
-            })
-            ->groupBy(DB::raw('DATE(created_at)'))  // Agrupamos solo por la fecha
-            ->orderBy('fecha')
-            ->get();
-
-        // Transformamos los datos para usarlos en Chart.js
-        $fechas = $ventasPorFecha->pluck('fecha')->toArray();
-        $totalesVentas = $ventasPorFecha->pluck('total')->toArray();
-
-        // Retornar los datos a la vista
-        return view('pages/dashboard/dashboard', compact(
-            'dataFeed',
-            'ventas',
-            'usuario',
-            'compras',
-            'gastos',      // Incluimos el total de gastos
-            'ganancias',
-            'clientes',
-            'productos',
-            'ventasrealizadas',
-            'fechaInicio',
-            'fechaFin',
-            'fechas',
-            'totalesVentas'
-        ));
+        $ventasrealizadas = Ventas::whereBetween('created_at', [$fechaInicioCompleta, $fechaFinCompleta])->get();
+        $ganancias = $this->calcularGanancias($fechaInicioCompleta, $fechaFinCompleta) - $gastos;
+    } else {
+        $ventas = Ventas::sum('total');
+        $compras = Compras::sum('total');
+        $gastos = Gastos::sum('total');
+        $ventasrealizadas = Ventas::all();
+        $ganancias = $this->calcularGanancias() - $gastos;
     }
 
+    // Obtener lista completa de productos
+     // Filtrar productos por cantidad vendida en el rango de fechas
+     $productos = DB::table('productos')
+     ->join('detalleventas', 'productos.id', '=', 'detalleventas.producto_id')
+     ->whereBetween('detalleventas.created_at', [$fechaInicioCompleta, $fechaFinCompleta])
+     ->select('productos.id', 'productos.nombre', 'productos.precio', DB::raw('SUM(detalleventas.cantidad) as cantidad_vendida'))
+     ->groupBy('productos.id', 'productos.nombre', 'productos.precio')
+     ->orderByDesc('cantidad_vendida')
+     ->get();
 
+    $clientes = Cliente::count();
+    $usuario = User::count();
 
+    $ventasPorFecha = Ventas::selectRaw('DATE(created_at) as fecha, SUM(total) as total')
+        ->when($fechaInicio && $fechaFin, function ($query) use ($fechaInicioCompleta, $fechaFinCompleta) {
+            return $query->whereBetween('created_at', [$fechaInicioCompleta, $fechaFinCompleta]);
+        })
+        ->groupBy(DB::raw('DATE(created_at)'))
+        ->orderBy('fecha')
+        ->get();
 
+    $fechas = $ventasPorFecha->pluck('fecha')->toArray();
+    $totalesVentas = $ventasPorFecha->pluck('total')->toArray();
+    return view('pages.dashboard.dashboard', compact(
+        'dataFeed',
+        'ventas',
+        'usuario',
+        'compras',
+        'gastos',
+        'ganancias',
+        'clientes',
+        'productos', // Ahora contiene la cantidad total vendida por producto
+        'ventasrealizadas',
+        'fechaInicio',
+        'fechaFin',
+        'fechas',
+        'totalesVentas'
+    ));
+}
+    
+
+    
 
 
     /**

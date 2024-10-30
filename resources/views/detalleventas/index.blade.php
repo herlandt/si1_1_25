@@ -11,7 +11,10 @@
                     </h3>
                     <input type="hidden" id="venta_id" name="venta_id" value="{{ $venta->id }}">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @hasanyrole('ejecutivo|general')
+
                         <div class="mb-4">
+                       
                             <div class="flex">
                                 <span
                                     class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 border-e-0 rounded-s-md dark:bg-gray-600 dark:text-gray-400 dark:border-gray-600">
@@ -21,24 +24,32 @@
                                             d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z" />
                                     </svg>
                                 </span>
+                                
                                 <input type="text" id="cliente" name="cliente"
                                     class="rounded-none rounded-e-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     placeholder="Introduzca el nombre del cliente..."
                                     value="{{ $venta->cliente->nombre ?? '' }}" readonly>
+
+                                 
                             </div>
+                            
                         </div>
+                        
                         <div class="mb-4">
                             <div class="flex">
                                 <span
                                     class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 border-e-0 rounded-s-md dark:bg-gray-600 dark:text-gray-400 dark:border-gray-600">
                                     Celular
                                 </span>
+
                                 <input type="text" id="celular" name="celular"
                                     class="rounded-none rounded-e-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     placeholder="Introduzca el celular..." value="{{ $venta->cliente->celular ?? '' }}"
                                     readonly>
                             </div>
                         </div>
+
+                        @endhasanyrole
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -58,7 +69,7 @@
                             <div class="flex">
                                 <span
                                     class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 border-e-0 rounded-s-md dark:bg-gray-600 dark:text-gray-400 dark:border-gray-600">
-                                    Descuento
+                                    Descuentos
                                 </span>
                                 <input type="text" id="descuento" name="descuento" value="0"
                                     class="rounded-none rounded-e-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -188,7 +199,7 @@
                                     </td>
                                     <td class="p-2 whitespace-nowrap text-center flex justify-center items-center">
                                         <input type="number" id="descuento{{ $p->id }}"
-                                            name="descuento[{{ $p->id }}]"
+                                            name="descuento++[{{ $p->id }}]"
                                             class="bg-gray-50 w-14 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-1 py-1 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                             placeholder="0" required value="{{ $p->descuento }}" /> Bs.
                                     </td>
@@ -236,7 +247,7 @@
                         </button>
                         <a
                             href="{{ route('ventas.show', $venta->id) }}"
-                            class="text-white inline-flex items-center bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-cyan-300 font-medium rounded-lg text-xs px-4 py-1.5 text-center dark:bg-slate-600 dark:hover:bg-slate-500 dark:focus:ring-cyan-800">
+                            class="text-white inline-flex items-center bg-green-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-cyan-300 font-medium rounded-lg text-xs px-4 py-1.5 text-center dark:bg-slate-600 dark:hover:bg-slate-500 dark:focus:ring-cyan-800">
                             Recibo
                         </a>
                     </div>

@@ -185,4 +185,68 @@
             });
         </script>
     @endpush
+
+    <form action="{{ route('dashboard') }}" method="GET">
+    <div class="flex flex-col sm:flex-row items-center sm:space-x-4 space-y-4 sm:space-y-0 mb-6 ml-8">
+        <!-- Fecha Inicio -->
+        <div class="w-full sm:w-auto">
+            <label for="fecha_inicio" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha Inicio</label>
+            <input type="date" name="fecha_inicio" id="fecha_inicio" value="{{ $fechaInicio }}"
+                   class="mt-1 block w-full sm:w-48 md:w-56 lg:w-64 border-gray-300 dark:border-gray-700 rounded-md shadow-sm dark:bg-gray-800 dark:text-gray-300">
+        </div>
+
+        <!-- Fecha Fin -->
+        <div class="w-full sm:w-auto">
+            <label for="fecha_fin" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha Fin</label>
+            <input type="date" name="fecha_fin" id="fecha_fin" value="{{ $fechaFin }}"
+                   class="mt-1 block w-full sm:w-48 md:w-56 lg:w-64 border-gray-300 dark:border-gray-700 rounded-md shadow-sm dark:bg-gray-800 dark:text-gray-300">
+        </div>
+
+        <!-- Botón Filtrar -->
+        <div class="w-full sm:w-auto pt-2 sm:pt-6">
+            <button type="submit"
+                    class="w-full sm:w-auto px-4 py-2 bg-cyan-600 text-white rounded-md hover:bg-cyan-900 dark:bg-slate-700 dark:hover:bg-cyan-800 transition duration-200">
+                Filtrar
+            </button>
+        </div>
+
+        <!-- Botón Limpiar -->
+        <div class="w-full sm:w-auto pt-2 sm:pt-6">
+            <a href="{{ route('dashboard') }}"
+               class="w-full sm:w-auto px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-700 transition duration-200">
+                Limpiar
+            </a>
+        </div>
+    </div>
+</form>
+<!-- Listado de Productos -->
+<!-- Listado de Productos -->
+<div class="container mx-auto py-8">
+    <h2 class="text-2xl font-semibold mb-4">Listado de Productos</h2>
+    <table class="min-w-full bg-white dark:bg-gray-800">
+        <thead>
+            <tr>
+                <th class="pl-6 pr-4 py-2 text-left border-b dark:border-gray-700">ID</th>
+                <th class="pl-6 pr-4 py-2 text-left border-b dark:border-gray-700">Nombre</th>
+                <th class="pl-6 pr-4 py-2 text-left border-b dark:border-gray-700">Precio</th>
+                <th class="pl-6 pr-0 py-2 text-left border-b dark:border-gray-700">Cantidad Vendida</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($productos as $producto)
+            <tr>
+                <td class="px-7 py-2 border-b dark:border-gray-700">{{ $producto->id }}</td>
+                <td class="px-8 py-2 border-b dark:border-gray-700">{{ $producto->nombre }}</td>
+                <td class="px-6 py-2 border-b dark:border-gray-700">{{ number_format($producto->precio, 2) }} Bs.</td>
+                <td class="px-12 py-2 border-b dark:border-gray-700">{{ $producto->cantidad_vendida }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
+
+
+            
+
+
 </x-app-layout>

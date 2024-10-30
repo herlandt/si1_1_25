@@ -15,7 +15,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
             <div
                 class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 transform hover:scale-105 transition duration-300 ease-in-out">
-                <h3 class="text-lg font-semibold mb-2 text-red-600 dark:text-red-400">Ventas</h3>
+                <h3 class="text-lg font-semibold mb-2 text-red-600 dark:text-red-400">Ventas Monto</h3>
                 <p class="text-xl font-bold text-gray-800 dark:text-gray-200">Total: {{ number_format($ventasHoy, 2) }}
                     Bs.</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Ventas Realizadas de Hoy</p>

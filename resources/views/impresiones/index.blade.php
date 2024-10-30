@@ -11,7 +11,7 @@
                 {{ session('error') }}
             </div>
         @endif
-
+        @hasanyrole('ejecutivo|general')
         <!-- Filtro de Fechas y Usuario -->
         <div class="mb-6 bg-gradient-to-r from-blue-500 to-blue-400 dark:from-blue-700 dark:to-blue-600 p-6 rounded-lg shadow-lg">
             <form method="GET" action="{{ route('impresiones.index') }}" class="flex flex-wrap gap-4">
@@ -51,10 +51,11 @@
                 </div>
             </form>
         </div>
-
+        @endhasanyrole
         <!-- Mostrar Impresiones Totales, Ventas del Usuario y del Día -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-gradient-to-r from-red-500 to-red-400 dark:from-red-700 dark:to-red-600 shadow-lg rounded-lg p-6 transform hover:scale-105 transition duration-300 ease-in-out">
+        @hasanyrole('ejecutivo|general')
+        <div class="bg-gradient-to-r from-red-500 to-red-400 dark:from-red-700 dark:to-red-600 shadow-lg rounded-lg p-6 transform hover:scale-105 transition duration-300 ease-in-out">
                 <h3 class="text-lg font-semibold mb-2 text-white">Total de Impresiones en Rango</h3>
                 <p class="text-2xl font-bold text-white">Total: {{ number_format($impresionesTotales, 2) }} Bs.</p>
                 <p class="text-sm text-gray-200">Impresiones en el rango de fechas seleccionado</p>
@@ -64,6 +65,7 @@
                 <p class="text-2xl font-bold text-white">Total: {{ number_format($impresionesUsuario, 2) }} Bs.</p>
                 <p class="text-sm text-gray-200">Ventas realizadas por el usuario autenticado</p>
             </div>
+            @endhasanyrole
             <div class="bg-gradient-to-r from-green-500 to-green-400 dark:from-green-700 dark:to-green-600 shadow-lg rounded-lg p-6 transform hover:scale-105 transition duration-300 ease-in-out">
                 <h3 class="text-lg font-semibold mb-2 text-white">Impresiones del Día</h3>
                 <p class="text-2xl font-bold text-white">
